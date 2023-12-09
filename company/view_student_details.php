@@ -1,40 +1,35 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['id'], $_SESSION['user_role_id'])) {
-    header('location:login.php');
-    exit;
-}
+require_once('config.php');
 
-require_once('config.php'); // Make sure this file includes the database connection
+// Assuming you have a logged-in user
+$id = $_SESSION['id'];
 
-// Check if $dbConn is defined
-if (!isset($dbConn)) {
-    die('Database connection not established. Check your configuration.');
-}
+// Retrieve student information from the database based on user ID
+$sql = "SELECT * FROM students WHERE id = :id";
+$query = $dbConn->prepare($sql);
+$query->bindParam(':id', $id);
+$query->execute();
+$studentInfo = $query->fetch(PDO::FETCH_ASSOC);
 
-// Fetch all companies from the database
-$sql = "SELECT id, CONCAT(first_name, ' ', last_name) AS FullName FROM tbl_users WHERE user_role_id = 4";
-
-// Check for errors in the query execution
-try {
-    $query = $dbConn->query($sql);
-    $companies = $query->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die('Error executing the query: ' . $e->getMessage());
-}
+// Close the database connection
+$dbConn = null;
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <!-- Your head content remains unchanged -->
+    <!-- Add your head content here -->
+    <title>Student Information</title>
+    <!-- Add your styles or link external CSS files here -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Student List</title>
-    <!-- Add your CSS styles or link external CSS files here -->
+    <title>Dashboard</title>
+    <!-- ================= Favicon ================== -->
+    <!-- Standard -->
     <link rel="shortcut icon" href="http://placehold.it/64.png/000/fff">
     <!-- Retina iPad Touch Icon-->
     <link rel="apple-touch-icon" sizes="144x144" href="http://placehold.it/144.png/000/fff">
@@ -58,48 +53,28 @@ try {
     <link href="../assets/css/own.css" rel="stylesheet">
 </head>
 
-<body class="sidebar-hide">
-    <?php require_once('../layouts/sidebar.php'); ?>
-    <?php require_once('../layouts/header.php'); ?>
+<body>
+    <?php require_once('../layouts/sidebar.php');
 
+    ?>
+
+    <?php require_once('../layouts/header.php'); ?>
     <div class="content-wrap">
         <div class="main">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card alert">
-                            <div class="card-header">
-                                <h4>View Students</h4>
-                            </div>
-                            <div class="card-body">
-                                <table class="table table-responsive table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Action</th>
-                                            <!-- Add more columns as needed -->
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($companies as $company) : ?>
-                                            <tr>
-                                                <td><?= $company['id']; ?></td>
-                                                <td><?= $company['FullName']; ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                <div class="container-fluid">
+                    <h2>Student Information</h2>
 
-    <!-- Your script imports remain unchanged -->
-    <!-- Add your scripts or link external JS files here -->
+                    <?php if ($studentInfo) : ?>
+                        <p><strong>Full Name:</strong> <?= $studentInfo['name'] ; ?></p>
+                        <p><strong>Email:</strong> <?= $studentInfo['email']; ?></p>
+                        <p><strong>Phone:</strong> <?= $studentInfo['phone']; ?></p>
+                        <p><strong>CGPA:</strong> <?= $studentInfo['cgpa']; ?></p>
+                        <p><strong>Bio:</strong> <?= $studentInfo['bio']; ?></p>
+                        <p><strong>CV:</strong> <a href="path/to/cv/<?= $studentInfo['cv']; ?>" target="_blank">Download CV</a></p>
+                    <?php else : ?>
+                        <p>No student information found.</p>
+                    <?php endif; ?>
+                </div>
     <!-- jquery vendor -->
     <script src="../assets/js/lib/jquery.min.js"></script>
     <script src="../assets/js/lib/jquery.nanoscroller.min.js"></script>

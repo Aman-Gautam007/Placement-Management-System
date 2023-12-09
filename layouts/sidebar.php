@@ -34,9 +34,16 @@
                         </a>
                     </li>
                 <?php } ?>
-                <?php if ($_SESSION['user_role_id'] == 1 || $_SESSION['user_role_id'] == 2) { ?>
+                <?php if ($_SESSION['user_role_id'] == 1) { ?>
                     <li>
                         <a href="view_students.php">
+                            <i class="ti-pencil"></i> Students
+                        </a>
+                    </li>
+                <?php } ?>
+                <?php if ($_SESSION['user_role_id'] == 2) { ?>
+                    <li>
+                        <a href="view_applied_students.php">
                             <i class="ti-pencil"></i> Students
                         </a>
                     </li>
